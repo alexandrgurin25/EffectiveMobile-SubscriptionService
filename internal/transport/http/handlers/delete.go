@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"net/http"
-	"subscriptions/internal/transport/http/dto/subscription"
 	"subscriptions/pkg/logger"
 
 	"github.com/go-chi/chi"
@@ -13,8 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (h *Handlers) Get(w http.ResponseWriter, r *http.Request) {
-
+func (h Handlers) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	idStr := chi.URLParam(r, "id")
@@ -33,14 +30,15 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request) {
 
 	id := UUID.String()
 
-	gotSub, err := h.service.GetById(ctx, id)
+	err = h.service.DeleteById(ctx, id)
+
 	if err != nil {
 		var errStr string
 		if errors.Is(err, sql.ErrNoRows) {
 			errStr = "Subscription not found"
 			h.sendError(w, http.StatusNotFound, errStr)
 		} else {
-			errStr = "Failed to fetch subscription"
+			errStr = "Couldn't delete subscription"
 			h.sendError(w, http.StatusInternalServerError, errStr)
 		}
 
@@ -51,19 +49,8 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := subscription.SubResponse{
-		Id:        gotSub.Id,
-		Name:      gotSub.Name,
-		Price:     gotSub.Price,
-		UserId:    gotSub.UserId,
-		StartDate: gotSub.StartDate,
-		EndData:   gotSub.EndDate,
-	}
-
 	logger.GetLoggerFromCtx(ctx).Info(ctx,
-		"Subscription got successfully!",
-		zap.Any("res", res))
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+		"Subscription delete successfully!",
+		zap.Any("id", id))
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -9,7 +9,7 @@ type SubRequest struct {
 }
 
 type SubResponse struct {
-	Id        string  `json:"id"`
+	Id        string `json:"id"`
 	Name      string `json:"service_name"`
 	Price     int    `json:"price"`
 	UserId    string `json:"user_id"`

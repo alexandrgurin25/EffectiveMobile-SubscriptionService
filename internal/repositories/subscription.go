@@ -10,6 +10,8 @@ import (
 type Repository interface {
 	Create(ctx context.Context, sub *entity.Subscription) (*entity.Subscription, error)
 	GetById(ctx context.Context, id string) (*entity.Subscription, error)
+	UpdateById(ctx context.Context, sub *entity.Subscription) error
+	DeleteById(ctx context.Context, id string) error
 }
 
 type subRepository struct {

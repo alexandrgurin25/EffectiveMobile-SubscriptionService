@@ -44,8 +44,8 @@ func main() {
 		r.Post("/", handlers.Create)
 		// r.Get("/", handlers.ListSubscriptions)
 		r.Get("/{id}", handlers.Get)
-		// r.Put("/{id}", handlers.UpdateSubscription)
-		// r.Delete("/{id}", handlers.DeleteSubscription)
+		r.Put("/{id}", handlers.Put)
+		r.Delete("/{id}", handlers.Delete)
 	})
 
 	http.ListenAndServe(":8080", r)

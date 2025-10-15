@@ -1,0 +1,237 @@
+definitions:
+  subscription.ErrorResponse:
+    properties:
+      message:
+        example: string
+        type: string
+    type: object
+  subscription.ListResponse:
+    properties:
+      has_next:
+        example: true
+        type: boolean
+      limit:
+        example: 20
+        type: integer
+      page:
+        example: 1
+        type: integer
+      subscriptions:
+        items:
+          $ref: '#/definitions/subscription.SubResponse'
+        type: array
+    type: object
+  subscription.SubRequest:
+    properties:
+      end_date:
+        example: 12-2025
+        type: string
+      price:
+        example: 400
+        minimum: 0
+        type: integer
+      service_name:
+        example: Yandex Plus
+        type: string
+      start_date:
+        example: 07-2025
+        type: string
+      user_id:
+        example: 60601fee-2bf1-4721-ae6f-7636e79a0cba
+        type: string
+    required:
+    - price
+    - service_name
+    - start_date
+    - user_id
+    type: object
+  subscription.SubResponse:
+    properties:
+      end_date:
+        example: 12-2025
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      price:
+        example: 400
+        type: integer
+      service_name:
+        example: Yandex Plus
+        type: string
+      start_date:
+        example: 07-2025
+        type: string
+      user_id:
+        example: 60601fee-2bf1-4721-ae6f-7636e79a0cba
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Сервис для управления подписками пользователей
+  title: Subscriptions Service API
+  version: 1.0.0
+paths:
+  /api/subscriptions/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 1
+        description: Номер страницы (опционально)
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Количество элементов на странице (опционально)
+        in: query
+        name: limit
+        type: integer
+      - description: Фильтр по ID пользователя (опционально)
+        in: query
+        name: user_id
+        type: string
+      - description: Фильтр по названию сервиса (опционально)
+        in: query
+        name: service_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with subscriptions list
+          schema:
+            $ref: '#/definitions/subscription.ListResponse'
+        "400":
+          description: Invalid format for UUID in `user_id`
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "404":
+          description: Subscriptions not found
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+      summary: Получение списка подписок с фильтрацией по ID пользователя, названием
+        сервиса и пагинацией
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subscription data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/subscription.SubRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Subscription created successful
+          schema:
+            $ref: '#/definitions/subscription.SubResponse'
+        "400":
+          description: Invalid JSON or Invalid format for UUID in `user_id`
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+      summary: Создание новой подписки для пользователя
+  /api/subscriptions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление подписки по ID
+      parameters:
+      - description: Subscription ID in UUID format
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Subscription deleted successfully
+        "400":
+          description: Invalid format for UUID in `id`
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "404":
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subscription ID in UUID format
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription details
+          schema:
+            $ref: '#/definitions/subscription.SubResponse'
+        "400":
+          description: Invalid format for UUID in `id`
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "404":
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+      summary: Получение подписки по ID
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subscription ID in UUID format
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Subscription update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/subscription.SubRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated subscription details
+          schema:
+            $ref: '#/definitions/subscription.SubResponse'
+        "400":
+          description: Invalid format for UUID in `id`, JSON, or validation error
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "404":
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+      summary: Обновление подписки по ID
+swagger: "2.0"

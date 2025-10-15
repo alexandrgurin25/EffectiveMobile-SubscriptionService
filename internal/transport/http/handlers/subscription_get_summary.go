@@ -13,6 +13,21 @@ import (
 	"go.uber.org/zap"
 )
 
+// GetSummary calculates total subscription cost for a user and service in a given period
+// @Summary Calculate subscription summary
+// @Description Get total cost of subscriptions for a specific user and service within a date range
+// @Accept json
+// @Produce json
+// @Param user_id path string true "User ID in UUID format"
+// @Param service_name path string true "Service name"
+// @Param start_date query string true "Start date in MM-YYYY format" example("01-2024")
+// @Param end_date query string false "End date in MM-YYYY format" example("12-2024")
+// @Success 200 {object} subscription.Summary "Success response with total cost"
+// @Failure 400 {object} subscription.ErrorResponse "Invalid format for UUID in `user_id`, empty service_name or missing start_date"
+// @Failure 404 {object} subscription.ErrorResponse "No subscriptions found for given criteria"
+// @Failure 500 {object} subscription.ErrorResponse "Internal server error"
+// @Router /api/subscriptions/summary/{user_id}/{service_name} [get]
+
 func (h *Handlers) GetSummary(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -20,7 +35,7 @@ func (h *Handlers) GetSummary(w http.ResponseWriter, r *http.Request) {
 
 	UUID, err := uuid.Parse(userIdStr)
 	if err != nil {
-		errStr := "Invalid UUID"
+		errStr := "Invalid format for UUID in `user_id`"
 		h.sendError(w, http.StatusBadRequest, errStr)
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
 			errStr,

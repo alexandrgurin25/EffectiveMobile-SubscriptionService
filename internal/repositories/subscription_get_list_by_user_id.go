@@ -25,8 +25,8 @@ func (r *subRepository) GetList(ctx context.Context, offset, limit int, userID, 
 	}
 
 	if serviceName != "" {
-		query += fmt.Sprintf(" AND service_name ILIKE $%d", argIndex)
-		args = append(args, "%"+serviceName+"%")
+		query += fmt.Sprintf(" AND service_name = $%d", argIndex)
+		args = append(args, serviceName)
 		argIndex++
 	}
 

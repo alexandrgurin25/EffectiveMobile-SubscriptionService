@@ -9,9 +9,23 @@ import (
 	"subscriptions/internal/transport/http/dto/subscription"
 	"subscriptions/pkg/logger"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
+// GetList returns paginated list of subscriptions with optional filtering
+// @Summary Получение списка подписок с фильтрацией по ID пользователя, названием сервиса и пагинацией
+// @Accept json
+// @Produce json
+// @Param page query int false "Номер страницы (опционально)" default(1)
+// @Param limit query int false "Количество элементов на странице (опционально)" default(20)
+// @Param user_id query string false "Фильтр по ID пользователя (опционально)"
+// @Param service_name query string false "Фильтр по названию сервиса (опционально)"
+// @Success 200 {object} subscription.ListResponse "Success response with subscriptions list"
+// @Failure 400 {object} subscription.ErrorResponse "Invalid format for UUID in `user_id`"
+// @Failure 404 {object} subscription.ErrorResponse "Subscriptions not found"
+// @Failure 500 {object} subscription.ErrorResponse "Internal server error"
+// @Router /api/subscriptions/ [get]
 func (h *Handlers) GetList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -30,7 +44,20 @@ func (h *Handlers) GetList(w http.ResponseWriter, r *http.Request) {
 		limit = 20
 	}
 
-	gotSubs, hasNext,  err := h.service.GetList(ctx, page, limit, userId, serviceName)
+	if userId != "" {
+		_, err = uuid.Parse(userId)
+
+		if err != nil {
+			errStr := "Invalid format for UUID in `user_id`"
+			h.sendError(w, http.StatusBadRequest, errStr)
+			logger.GetLoggerFromCtx(ctx).Error(ctx,
+				errStr,
+				zap.Error(err))
+			return
+		}
+	}
+
+	gotSubs, hasNext, err := h.service.GetList(ctx, page, limit, userId, serviceName)
 
 	if err != nil {
 		var errStr string

@@ -1,18 +1,39 @@
+
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 	"subscriptions/internal/entity"
 	"subscriptions/internal/transport/http/dto/subscription"
 	"subscriptions/pkg/logger"
 
+	"github.com/go-chi/chi"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
-func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) Put(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	idStr := chi.URLParam(r, "id")
+
+	UUID, err := uuid.Parse(idStr)
+
+	if err != nil {
+		errStr := "Invalid UUID"
+		h.sendError(w, http.StatusBadRequest, errStr)
+		logger.GetLoggerFromCtx(ctx).Error(ctx,
+			errStr,
+			zap.Any("id", idStr),
+			zap.Error(err))
+		return
+	}
+
+	id := UUID.String()
 
 	var req subscription.SubRequest
 
@@ -47,7 +68,8 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newSubscription := entity.Subscription{
+	updateSubscription := entity.Subscription{
+		Id:        id,
 		Name:      req.Name,
 		Price:     req.Price,
 		UserId:    req.UserId,
@@ -55,37 +77,38 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 		EndDate:   req.EndData,
 	}
 
-	createdSub, err := h.service.Create(ctx, &newSubscription)
+	putSub, err := h.service.UpdateById(ctx, &updateSubscription)
 
 	if err != nil {
+		var errStr string
+		if errors.Is(err, sql.ErrNoRows) {
+			errStr = "Subscription not found"
+			h.sendError(w, http.StatusNotFound, errStr)
+		} else {
+			errStr = "Couldn't renew subscription"
+			h.sendError(w, http.StatusInternalServerError, errStr)
+		}
+
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
-			"failed to create Subscription",
-			zap.Any("sub", req),
+			errStr,
+			zap.Any("id", idStr),
 			zap.Error(err))
-		h.sendError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
 	res := subscription.SubResponse{
-		Id:        createdSub.Id,
-		Name:      createdSub.Name,
-		Price:     createdSub.Price,
-		UserId:    createdSub.UserId,
-		StartDate: createdSub.StartDate,
-		EndData:   createdSub.EndDate,
+		Id:        putSub.Id,
+		Name:      putSub.Name,
+		Price:     putSub.Price,
+		UserId:    putSub.UserId,
+		StartDate: putSub.StartDate,
+		EndData:   putSub.EndDate,
 	}
 
 	logger.GetLoggerFromCtx(ctx).Info(ctx,
-		"Subscription created successfully!",
-		zap.Any("sub", createdSub))
+		"Subscription put successfully!",
+		zap.Any("res", res))
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated) //201
 	json.NewEncoder(w).Encode(res)
-}
-
-func (h *Handlers) sendError(w http.ResponseWriter, status int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]string{"error": message})
 }

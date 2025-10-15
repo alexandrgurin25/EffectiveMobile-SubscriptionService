@@ -10,21 +10,21 @@ import (
 )
 
 func (r *subRepository) Create(ctx context.Context, sub *entity.Subscription) (*entity.Subscription, error) {
-	var id, price int
-	var name, userID string
+	var price int
+	var id, name, userId string
 	var startDateDB time.Time
 	var endDateDB sql.NullTime
 
-	startDateForDB, err := parseDateToDB(sub.StartData)
+	startDateForDB, err := parseDateToDB(sub.StartDate)
 	if err != nil {
 		return nil, fmt.Errorf("invalid start date: %v", err)
 	}
 
 	var endDateForDB interface{}
-	if sub.EndData == "" {
+	if sub.EndDate == "" {
 		endDateForDB = nil
 	} else {
-		parsedEndDate, err := parseDateToDB(sub.EndData)
+		parsedEndDate, err := parseDateToDB(sub.EndDate)
 		if err != nil {
 			return nil, fmt.Errorf("invalid end date: %v", err)
 		}
@@ -38,17 +38,17 @@ func (r *subRepository) Create(ctx context.Context, sub *entity.Subscription) (*
 		RETURNING id, service_name, price, user_id, start_date, end_date`,
 		sub.Name,
 		sub.Price,
-		sub.UserID,
+		sub.UserId,
 		startDateForDB,
 		endDateForDB,
-	).Scan(&id, &name, &price, &userID, &startDateDB, &endDateDB)
+	).Scan(&id, &name, &price, &userId, &startDateDB, &endDateDB)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to create subscription: %v", err)
+		return nil, fmt.Errorf("failed to CREATE subscription: %v", err)
 	}
 
 	startDateFormatted := formatTimeToMMYYYY(startDateDB)
-	
+
 	var endDateFormatted string
 	if endDateDB.Valid {
 		endDateFormatted = formatTimeToMMYYYY(endDateDB.Time)
@@ -60,9 +60,9 @@ func (r *subRepository) Create(ctx context.Context, sub *entity.Subscription) (*
 		Id:        id,
 		Name:      name,
 		Price:     price,
-		UserID:    userID,
-		StartData: startDateFormatted,
-		EndData:   endDateFormatted,
+		UserId:    userId,
+		StartDate: startDateFormatted,
+		EndDate:   endDateFormatted,
 	}, nil
 }
 

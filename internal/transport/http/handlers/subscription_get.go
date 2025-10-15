@@ -13,6 +13,16 @@ import (
 	"go.uber.org/zap"
 )
 
+// Get returns subscription by ID
+// @Summary Получение подписки по ID
+// @Accept json
+// @Produce json
+// @Param id path string true "Subscription ID in UUID format"
+// @Success 200 {object} subscription.SubResponse "Subscription details"
+// @Failure 400 {object} subscription.ErrorResponse "Invalid format for UUID in `id`"
+// @Failure 404 {object} subscription.ErrorResponse "Subscription not found"
+// @Failure 500 {object} subscription.ErrorResponse "Internal server error"
+// @Router /api/subscriptions/{id} [get]
 func (h *Handlers) Get(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
@@ -22,7 +32,7 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request) {
 	UUID, err := uuid.Parse(idStr)
 
 	if err != nil {
-		errStr := "Invalid UUID"
+		errStr := "Invalid format for UUID in `id`"
 		h.sendError(w, http.StatusBadRequest, errStr)
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
 			errStr,
@@ -57,7 +67,7 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request) {
 		Price:     gotSub.Price,
 		UserId:    gotSub.UserId,
 		StartDate: gotSub.StartDate,
-		EndData:   gotSub.EndDate,
+		EndDate:   gotSub.EndDate,
 	}
 
 	logger.GetLoggerFromCtx(ctx).Info(ctx,

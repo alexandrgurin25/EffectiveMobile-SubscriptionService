@@ -3,23 +3,27 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"subscriptions/internal/entity"
 	"subscriptions/internal/transport/http/dto/subscription"
 	"subscriptions/pkg/logger"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
+// Create creates a new subscription
+// @Summary Создание новой подписки для пользователя
+// @Accept json
+// @Produce json
+// @Param input body subscription.SubRequest true "Subscription data"
+// @Success 201 {object} subscription.SubResponse "Subscription created successful"
+// @Failure 400 {object} subscription.ErrorResponse "Invalid JSON or Invalid format for UUID in `user_id`"
+// @Failure 500 {object} subscription.ErrorResponse "Internal server error"
+// @Router /api/subscriptions/ [post]
 func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var req subscription.SubRequest
-
-	if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
-		h.sendError(w, http.StatusUnsupportedMediaType, "Content-Type must be application/json")
-		return
-	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
@@ -47,12 +51,23 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, err := uuid.Parse(req.UserId)
+
+	if err != nil {
+		errStr := "Invalid format for UUID in `user_id`"
+		h.sendError(w, http.StatusBadRequest, errStr)
+		logger.GetLoggerFromCtx(ctx).Error(ctx,
+			errStr,
+			zap.Error(err))
+		return
+	}
+
 	newSubscription := entity.Subscription{
 		Name:      req.Name,
 		Price:     req.Price,
 		UserId:    req.UserId,
 		StartDate: req.StartDate,
-		EndDate:   req.EndData,
+		EndDate:   req.EndDate,
 	}
 
 	createdSub, err := h.service.Create(ctx, &newSubscription)
@@ -72,7 +87,7 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 		Price:     createdSub.Price,
 		UserId:    createdSub.UserId,
 		StartDate: createdSub.StartDate,
-		EndData:   createdSub.EndDate,
+		EndDate:   createdSub.EndDate,
 	}
 
 	logger.GetLoggerFromCtx(ctx).Info(ctx,

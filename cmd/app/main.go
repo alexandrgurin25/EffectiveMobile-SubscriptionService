@@ -5,14 +5,21 @@ import (
 	"net/http"
 	"subscriptions/internal/config"
 	"subscriptions/internal/repositories"
-	service "subscriptions/internal/services"
+	"subscriptions/internal/services"
 	"subscriptions/internal/transport/http/handlers"
 	"subscriptions/pkg/logger"
 	"subscriptions/pkg/postgres"
 
 	"github.com/go-chi/chi"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
+
+	_ "subscriptions/docs"
 )
+
+// @title Subscriptions Service API
+// @version 1.0.0
+// @description Сервис для управления подписками пользователей
 
 func main() {
 	ctx := context.Background()
@@ -36,16 +43,21 @@ func main() {
 	r := chi.NewRouter()
 	repository := repositories.New(db)
 
-	service := service.New(repository)
+	service := services.New(repository)
 
 	handlers := handlers.New(service)
 
-	r.Route("/api", func(r chi.Router) {
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"), // URL для JSON документации
+	))
+
+	r.Route("/api/subscriptions/", func(r chi.Router) {
 		r.Post("/", handlers.Create)
-		r.Get("/user/{id}", handlers.GetList)
+		r.Get("/", handlers.GetList) // /api/subscriptions?page=1&limit=10
 		r.Get("/{id}", handlers.Get)
 		r.Put("/{id}", handlers.Put)
 		r.Delete("/{id}", handlers.Delete)
+		r.Get("/summary/{user_id}/{service_name}", handlers.GetSummary)
 	})
 
 	http.ListenAndServe(":8080", r)

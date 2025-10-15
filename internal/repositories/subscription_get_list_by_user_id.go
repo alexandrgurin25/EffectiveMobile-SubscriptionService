@@ -8,50 +8,58 @@ import (
 	"time"
 )
 
-func (r *subRepository) GetListByUserID(ctx context.Context, userID string) ([]entity.Subscription, error) {
-	rows, err := r.pool.Query(ctx, `
-        SELECT id, service_name, price, user_id, start_date, end_date
-        FROM subscriptions
-        WHERE user_id = $1
-    `, userID)
+func (r *subRepository) GetList(ctx context.Context, offset, limit int, userID, serviceName string) ([]entity.Subscription, error) {
+	query := `
+		SELECT id, service_name, price, user_id, start_date, end_date
+		FROM subscriptions
+		WHERE 1=1
+	`
+
+	args := []interface{}{}
+	argIndex := 1
+
+	if userID != "" {
+		query += fmt.Sprintf(" AND user_id = $%d", argIndex)
+		args = append(args, userID)
+		argIndex++
+	}
+
+	if serviceName != "" {
+		query += fmt.Sprintf(" AND service_name = $%d", argIndex)
+		args = append(args, serviceName)
+		argIndex++
+	}
+
+	query += fmt.Sprintf(" ORDER BY id LIMIT $%d OFFSET $%d", argIndex, argIndex+1)
+	args = append(args, limit, offset)
+
+	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query subscriptions: %w", err)
+		return nil, err
 	}
 	defer rows.Close()
 
 	var subs []entity.Subscription
-
 	for rows.Next() {
-		var sub entity.Subscription
 		var startDateDB time.Time
 		var endDateDB sql.NullTime
-
-		if err := rows.Scan(
-			&sub.Id,
-			&sub.Name,
-			&sub.Price,
-			&sub.UserId,
-			&startDateDB,
-			&endDateDB,
-		); err != nil {
+		var s entity.Subscription
+		err := rows.Scan(&s.Id, &s.Name, &s.Price, &s.UserId, &startDateDB, &endDateDB)
+		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
-		sub.StartDate = formatTimeToMMYYYY(startDateDB)
+		s.StartDate = formatTimeToMMYYYY(startDateDB)
 		if endDateDB.Valid {
-			sub.EndDate = formatTimeToMMYYYY(endDateDB.Time)
+			s.EndDate = formatTimeToMMYYYY(endDateDB.Time)
 		}
 
-		subs = append(subs, sub)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %w", err)
+		subs = append(subs, s)
 	}
 
 	if len(subs) == 0 {
 		return subs, sql.ErrNoRows
 	}
-
+	
 	return subs, nil
 }

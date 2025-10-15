@@ -1,4 +1,3 @@
-
 package handlers
 
 import (
@@ -6,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 	"subscriptions/internal/entity"
 	"subscriptions/internal/transport/http/dto/subscription"
 	"subscriptions/pkg/logger"
@@ -16,6 +14,17 @@ import (
 	"go.uber.org/zap"
 )
 
+// Put updates subscription by ID
+// @Summary Обновление подписки по ID
+// @Accept json
+// @Produce json
+// @Param id path string true "Subscription ID in UUID format"
+// @Param input body subscription.SubRequest true "Subscription update data"
+// @Success 200 {object} subscription.SubResponse "Updated subscription details"
+// @Failure 400 {object} subscription.ErrorResponse "Invalid format for UUID in `id`, JSON, or validation error"
+// @Failure 404 {object} subscription.ErrorResponse "Subscription not found"
+// @Failure 500 {object} subscription.ErrorResponse "Internal server error"
+// @Router /api/subscriptions/{id} [put]
 func (h *Handlers) Put(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -24,7 +33,7 @@ func (h *Handlers) Put(w http.ResponseWriter, r *http.Request) {
 	UUID, err := uuid.Parse(idStr)
 
 	if err != nil {
-		errStr := "Invalid UUID"
+		errStr := "Invalid format for UUID in `id`"
 		h.sendError(w, http.StatusBadRequest, errStr)
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
 			errStr,
@@ -36,11 +45,6 @@ func (h *Handlers) Put(w http.ResponseWriter, r *http.Request) {
 	id := UUID.String()
 
 	var req subscription.SubRequest
-
-	if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
-		h.sendError(w, http.StatusUnsupportedMediaType, "Content-Type must be application/json")
-		return
-	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
@@ -74,7 +78,7 @@ func (h *Handlers) Put(w http.ResponseWriter, r *http.Request) {
 		Price:     req.Price,
 		UserId:    req.UserId,
 		StartDate: req.StartDate,
-		EndDate:   req.EndData,
+		EndDate:   req.EndDate,
 	}
 
 	putSub, err := h.service.UpdateById(ctx, &updateSubscription)
@@ -102,7 +106,7 @@ func (h *Handlers) Put(w http.ResponseWriter, r *http.Request) {
 		Price:     putSub.Price,
 		UserId:    putSub.UserId,
 		StartDate: putSub.StartDate,
-		EndData:   putSub.EndDate,
+		EndDate:   putSub.EndDate,
 	}
 
 	logger.GetLoggerFromCtx(ctx).Info(ctx,

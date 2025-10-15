@@ -1,10 +1,10 @@
 package entity
 
 type Subscription struct {
-	Id        int
+	Id        string
 	Name      string
 	Price     int
-	UserID    string
-	StartData string
-	EndData   string
+	UserId    string
+	StartDate string
+	EndDate   string
 }

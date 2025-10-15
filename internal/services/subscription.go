@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 type Service interface {
 	Create(ctx context.Context, sub *entity.Subscription) (*entity.Subscription, error)
+	GetById(ctx context.Context, id string) (*entity.Subscription, error)
 }
 
 type subService struct {

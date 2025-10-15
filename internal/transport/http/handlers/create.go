@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"subscriptions/internal/entity"
 	"subscriptions/internal/transport/http/dto/subscription"
 	"subscriptions/pkg/logger"
@@ -15,14 +16,14 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 
 	var req subscription.SubRequest
 
-	if r.Header.Get("Content-Type") != "application/json" {
+	if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
 		h.sendError(w, http.StatusUnsupportedMediaType, "Content-Type must be application/json")
 		return
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
-			"Failed to decode JSON request or negative <Price>",
+			"Failed to decode JSON request",
 			zap.Error(err),
 			zap.String("path", r.URL.Path),
 			zap.String("method", r.Method),
@@ -32,10 +33,12 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer r.Body.Close()
+
 	if req.Price < 0 || req.Name == "" ||
-		req.UserID == "" || req.StartDate == "" {
+		req.UserId == "" || req.StartDate == "" {
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
-			"Empty fields in json or ",
+			"Empty fields in json or negative <Price>",
 			zap.String("path", r.URL.Path),
 			zap.String("method", r.Method),
 			zap.Any("headers", r.Header),
@@ -47,9 +50,9 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 	newSubscription := entity.Subscription{
 		Name:      req.Name,
 		Price:     req.Price,
-		UserID:    req.UserID,
-		StartData: req.StartDate,
-		EndData:   req.EndData,
+		UserId:    req.UserId,
+		StartDate: req.StartDate,
+		EndDate:   req.EndData,
 	}
 
 	createdSub, err := h.service.Create(ctx, &newSubscription)
@@ -63,10 +66,22 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	res := subscription.SubResponse{
+		Id:        createdSub.Id,
+		Name:      createdSub.Name,
+		Price:     createdSub.Price,
+		UserId:    createdSub.UserId,
+		StartDate: createdSub.StartDate,
+		EndData:   createdSub.EndDate,
+	}
+
 	logger.GetLoggerFromCtx(ctx).Info(ctx,
 		"Subscription created successfully!",
 		zap.Any("sub", createdSub))
-	w.WriteHeader(http.StatusCreated) // 201
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated) //201
+	json.NewEncoder(w).Encode(res)
 }
 
 func (h *Handlers) sendError(w http.ResponseWriter, status int, message string) {

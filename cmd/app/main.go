@@ -40,7 +40,13 @@ func main() {
 
 	handlers := handlers.New(service)
 
-	r.Post("/api/create", handlers.Create)
+	r.Route("/api", func(r chi.Router) {
+		r.Post("/", handlers.Create)
+		// r.Get("/", handlers.ListSubscriptions)
+		r.Get("/{id}", handlers.Get)
+		// r.Put("/{id}", handlers.UpdateSubscription)
+		// r.Delete("/{id}", handlers.DeleteSubscription)
+	})
 
 	http.ListenAndServe(":8080", r)
 }

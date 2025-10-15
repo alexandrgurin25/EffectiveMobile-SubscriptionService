@@ -42,7 +42,7 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Post("/", handlers.Create)
-		// r.Get("/", handlers.ListSubscriptions)
+		r.Get("/user/{id}", handlers.GetList)
 		r.Get("/{id}", handlers.Get)
 		r.Put("/{id}", handlers.Put)
 		r.Delete("/{id}", handlers.Delete)

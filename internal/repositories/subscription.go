@@ -15,7 +15,8 @@ type Repository interface {
 	GetById(ctx context.Context, id string) (*entity.Subscription, error)
 	UpdateById(ctx context.Context, sub *entity.Subscription) error
 	DeleteById(ctx context.Context, id string) error
-	GetListByUserID(ctx context.Context, userID string) ([]entity.Subscription, error)
+	GetList(ctx context.Context, offset, limit int, userID, serviceName string) ([]entity.Subscription, error)
+	CalculateSummary(ctx context.Context, userID, serviceName, startDate, endDate string) (int, error)
 }
 
 type subRepository struct {

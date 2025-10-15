@@ -52,7 +52,7 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 		Price:     req.Price,
 		UserId:    req.UserId,
 		StartDate: req.StartDate,
-		EndDate:   req.EndData,
+		EndDate:   req.EndDate,
 	}
 
 	createdSub, err := h.service.Create(ctx, &newSubscription)
@@ -72,7 +72,7 @@ func (h *Handlers) Create(w http.ResponseWriter, r *http.Request) {
 		Price:     createdSub.Price,
 		UserId:    createdSub.UserId,
 		StartDate: createdSub.StartDate,
-		EndData:   createdSub.EndDate,
+		EndDate:   createdSub.EndDate,
 	}
 
 	logger.GetLoggerFromCtx(ctx).Info(ctx,

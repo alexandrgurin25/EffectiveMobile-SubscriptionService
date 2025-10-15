@@ -74,7 +74,7 @@ func (h *Handlers) Put(w http.ResponseWriter, r *http.Request) {
 		Price:     req.Price,
 		UserId:    req.UserId,
 		StartDate: req.StartDate,
-		EndDate:   req.EndData,
+		EndDate:   req.EndDate,
 	}
 
 	putSub, err := h.service.UpdateById(ctx, &updateSubscription)
@@ -102,7 +102,7 @@ func (h *Handlers) Put(w http.ResponseWriter, r *http.Request) {
 		Price:     putSub.Price,
 		UserId:    putSub.UserId,
 		StartDate: putSub.StartDate,
-		EndData:   putSub.EndDate,
+		EndDate:   putSub.EndDate,
 	}
 
 	logger.GetLoggerFromCtx(ctx).Info(ctx,

@@ -5,7 +5,7 @@ type SubRequest struct {
 	Price     int    `json:"price"`
 	UserId    string `json:"user_id"`
 	StartDate string `json:"start_date"`
-	EndData   string `json:"end_date"`
+	EndDate   string `json:"end_date"`
 }
 
 type SubResponse struct {
@@ -14,5 +14,13 @@ type SubResponse struct {
 	Price     int    `json:"price"`
 	UserId    string `json:"user_id"`
 	StartDate string `json:"start_date"`
-	EndData   string `json:"end_date"`
+	EndDate   string `json:"end_date"`
+}
+
+type Summary struct {
+	ServiceName string `json:"service_name"`
+	TotalCost   int    `json:"total_cost"`
+	UserId      string `json:"user_id"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date,omitempty"`
 }

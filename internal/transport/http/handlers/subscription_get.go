@@ -57,7 +57,7 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request) {
 		Price:     gotSub.Price,
 		UserId:    gotSub.UserId,
 		StartDate: gotSub.StartDate,
-		EndData:   gotSub.EndDate,
+		EndDate:   gotSub.EndDate,
 	}
 
 	logger.GetLoggerFromCtx(ctx).Info(ctx,

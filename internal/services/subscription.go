@@ -11,6 +11,7 @@ type Service interface {
 	GetById(ctx context.Context, id string) (*entity.Subscription, error)
 	UpdateById(ctx context.Context, sub *entity.Subscription) (*entity.Subscription, error)
 	DeleteById(ctx context.Context, id string) error
+	GetList(ctx context.Context, id string) ([]entity.Subscription, error)
 }
 
 type subService struct {

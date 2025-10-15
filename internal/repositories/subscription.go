@@ -2,7 +2,10 @@ package repositories
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"subscriptions/internal/entity"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -12,6 +15,7 @@ type Repository interface {
 	GetById(ctx context.Context, id string) (*entity.Subscription, error)
 	UpdateById(ctx context.Context, sub *entity.Subscription) error
 	DeleteById(ctx context.Context, id string) error
+	GetListByUserID(ctx context.Context, userID string) ([]entity.Subscription, error)
 }
 
 type subRepository struct {
@@ -20,4 +24,35 @@ type subRepository struct {
 
 func New(pool *pgxpool.Pool) Repository {
 	return &subRepository{pool: pool}
+}
+
+func parseDateToDB(dateStr string) (string, error) {
+	if dateStr == "" {
+		return "", nil
+	}
+
+	if len(dateStr) == 7 && strings.Contains(dateStr, "-") {
+		parts := strings.Split(dateStr, "-")
+		if len(parts) != 2 {
+			return "", fmt.Errorf("invalid date format: %s", dateStr)
+		}
+
+		month := parts[0]
+		if month < "01" || month > "12" {
+			return "", fmt.Errorf("invalid month: %s", month)
+		}
+
+		return fmt.Sprintf("%s-%s-01", parts[1], parts[0]), nil
+	}
+
+	_, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		return "", fmt.Errorf("invalid date format: %s", dateStr)
+	}
+
+	return dateStr, nil
+}
+
+func formatTimeToMMYYYY(t time.Time) string {
+	return t.Format("01-2006")
 }

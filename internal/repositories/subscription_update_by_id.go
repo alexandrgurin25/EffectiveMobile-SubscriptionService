@@ -26,7 +26,7 @@ func (r *subRepository) UpdateById(ctx context.Context, subIn *entity.Subscripti
 		endDateForDB = parsedEndDate
 	}
 
-	_, err = r.pool.Exec(
+	_, err = r.db.Exec(
 		ctx,
 		`Update subscriptions 
 		SET service_name = $2, price = $3, user_id = $4, start_date = $5, end_date = $6

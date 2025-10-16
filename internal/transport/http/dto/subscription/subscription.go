@@ -22,10 +22,10 @@ type SubResponse struct {
 // Summary represents subscription summary response
 type Summary struct {
 	UserId      string `json:"user_id" example:"60601fee-2bf1-4721-ae6f-7636e79a0cba"`
-	ServiceName string `json:"service_name" example:"Netflix"`
-	StartDate   string `json:"start_date" example:"01-2024"`
-	EndDate     string `json:"end_date,omitempty" example:"12-2024"`
-	TotalCost   int    `json:"total_cost" example:"2396"`
+	ServiceName string `json:"service_name" example:"Yandex Plus"`
+	StartDate   string `json:"start_date" example:"01-2025"`
+	EndDate     string `json:"end_date,omitempty" example:"12-2025"`
+	TotalCost   int    `json:"total_cost" example:"800"`
 }
 
 // ErrorResponse represents error response

@@ -34,7 +34,7 @@ func (r *subRepository) CalculateSummary(ctx context.Context, userID, serviceNam
 		args = append(args, startDateForDB)
 	}
 
-	err = r.pool.QueryRow(ctx, query, args...).Scan(&totalCost)
+	err = r.db.QueryRow(ctx, query, args...).Scan(&totalCost)
 	if err != nil {
 		return 0, fmt.Errorf("failed to calculate summary: %w", err)
 	}

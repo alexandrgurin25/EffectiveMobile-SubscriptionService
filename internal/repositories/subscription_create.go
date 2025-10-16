@@ -30,7 +30,7 @@ func (r *subRepository) Create(ctx context.Context, sub *entity.Subscription) (*
 		endDateForDB = parsedEndDate
 	}
 
-	err = r.pool.QueryRow(
+	err = r.db.QueryRow(
 		ctx,
 		`INSERT INTO subscriptions (service_name, price, user_id, start_date, end_date) 
 		VALUES ($1, $2, $3, $4, $5)

@@ -12,7 +12,7 @@ import (
 )
 
 // Delete removes subscription by ID
-// @Description Удаление подписки по ID
+// @Summary Удаление подписки по ID
 // @Accept json
 // @Produce json
 // @Param id path string true "Subscription ID in UUID format"

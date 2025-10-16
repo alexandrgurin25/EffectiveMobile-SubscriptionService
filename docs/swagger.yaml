@@ -66,6 +66,24 @@ definitions:
         example: 60601fee-2bf1-4721-ae6f-7636e79a0cba
         type: string
     type: object
+  subscription.Summary:
+    properties:
+      end_date:
+        example: 12-2025
+        type: string
+      service_name:
+        example: Yandex Plus
+        type: string
+      start_date:
+        example: 01-2025
+        type: string
+      total_cost:
+        example: 800
+        type: integer
+      user_id:
+        example: 60601fee-2bf1-4721-ae6f-7636e79a0cba
+        type: string
+    type: object
 info:
   contact: {}
   description: Сервис для управления подписками пользователей
@@ -146,7 +164,6 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Удаление подписки по ID
       parameters:
       - description: Subscription ID in UUID format
         in: path
@@ -170,6 +187,7 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/subscription.ErrorResponse'
+      summary: Удаление подписки по ID
     get:
       consumes:
       - application/json
@@ -234,4 +252,52 @@ paths:
           schema:
             $ref: '#/definitions/subscription.ErrorResponse'
       summary: Обновление подписки по ID
+  /api/subscriptions/summary/{user_id}/{service_name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID in UUID format
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Service name
+        in: path
+        name: service_name
+        required: true
+        type: string
+      - default: 01-2025
+        description: Start date in MM-YYYY format
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - default: 12-2025
+        description: End date in MM-YYYY format
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with total cost
+          schema:
+            $ref: '#/definitions/subscription.Summary'
+        "400":
+          description: Invalid format for UUID in `user_id`, empty service_name or
+            missing start_date
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "404":
+          description: No subscriptions found for given criteria
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/subscription.ErrorResponse'
+      summary: Рассчитывает общую стоимость подписки для пользователя за определенный
+        период
 swagger: "2.0"

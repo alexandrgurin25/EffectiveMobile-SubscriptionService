@@ -7,7 +7,7 @@ import (
 
 func (r *subRepository) DeleteById(ctx context.Context, id string) error {
 
-	_, err := r.pool.Exec(
+	_, err := r.db.Exec(
 		ctx,
 		`DELETE FROM subscriptions 
 		WHERE id = $1`,

@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"subscriptions/internal/transport/http/dto/subscription"
 	"subscriptions/pkg/logger"
@@ -13,21 +11,18 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetSummary calculates total subscription cost for a user and service in a given period
-// @Summary Calculate subscription summary
-// @Description Get total cost of subscriptions for a specific user and service within a date range
+// @Summary Рассчитывает общую стоимость подписки для пользователя за определенный период
 // @Accept json
 // @Produce json
 // @Param user_id path string true "User ID in UUID format"
 // @Param service_name path string true "Service name"
-// @Param start_date query string true "Start date in MM-YYYY format" example("01-2024")
-// @Param end_date query string false "End date in MM-YYYY format" example("12-2024")
+// @Param start_date query string true "Start date in MM-YYYY format" default(01-2025)
+// @Param end_date query string false "End date in MM-YYYY format" default(12-2025)
 // @Success 200 {object} subscription.Summary "Success response with total cost"
 // @Failure 400 {object} subscription.ErrorResponse "Invalid format for UUID in `user_id`, empty service_name or missing start_date"
 // @Failure 404 {object} subscription.ErrorResponse "No subscriptions found for given criteria"
 // @Failure 500 {object} subscription.ErrorResponse "Internal server error"
 // @Router /api/subscriptions/summary/{user_id}/{service_name} [get]
-
 func (h *Handlers) GetSummary(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -73,14 +68,8 @@ func (h *Handlers) GetSummary(w http.ResponseWriter, r *http.Request) {
 
 	totalCost, err := h.service.GetSummary(ctx, userId, serviceName, startDate, endDate)
 	if err != nil {
-		var errStr string
-		if errors.Is(err, sql.ErrNoRows) {
-			errStr = "No subscriptions found for given criteria"
-			h.sendError(w, http.StatusNotFound, errStr)
-		} else {
-			errStr = "Failed to calculate summary"
-			h.sendError(w, http.StatusInternalServerError, errStr)
-		}
+		errStr := "Failed to calculate summary"
+		h.sendError(w, http.StatusInternalServerError, errStr)
 
 		logger.GetLoggerFromCtx(ctx).Error(ctx,
 			errStr,
@@ -89,6 +78,19 @@ func (h *Handlers) GetSummary(w http.ResponseWriter, r *http.Request) {
 			zap.String("start_date", startDate),
 			zap.String("end_date", endDate),
 			zap.Error(err))
+		return
+	}
+
+	if totalCost == 0 {
+		errStr := "No subscriptions found for given criteria"
+		h.sendError(w, http.StatusNotFound, errStr)
+
+		logger.GetLoggerFromCtx(ctx).Error(ctx,
+			errStr,
+			zap.String("service_name", serviceName),
+			zap.String("user_id", userId),
+			zap.String("start_date", startDate),
+			zap.String("end_date", endDate))
 		return
 	}
 

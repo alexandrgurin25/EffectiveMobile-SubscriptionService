@@ -3,12 +3,16 @@ package main
 import (
 	"context"
 	"net/http"
+	"os"
+	"os/signal"
 	"subscriptions/internal/config"
 	"subscriptions/internal/repositories"
 	"subscriptions/internal/services"
 	"subscriptions/internal/transport/http/handlers"
 	"subscriptions/pkg/logger"
 	"subscriptions/pkg/postgres"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -60,5 +64,42 @@ func main() {
 		r.Get("/summary/{user_id}/{service_name}", handlers.GetSummary)
 	})
 
-	http.ListenAndServe(":8080", r)
+	server := &http.Server{
+		Addr:         ":8080",
+		Handler:      r,
+		ReadTimeout:  15 * time.Second, 
+		WriteTimeout: 15 * time.Second, 
+		IdleTimeout:  60 * time.Second, 
+	}
+
+	serverErrors := make(chan error, 1)
+
+	go func() {
+		log.Info(ctx, "Starting server on :8080")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			serverErrors <- err
+		}
+	}()
+
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case err := <-serverErrors:
+		log.Error(ctx, "Server error", zap.Error(err))
+		return
+
+	case <-shutdown:
+		log.Info(ctx, "Starting graceful shutdown")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(ctx); err != nil {
+			log.Error(ctx, "Graceful shutdown failed", zap.Error(err))
+			server.Close()
+		}
+	}
+
+	log.Info(ctx, "Server stopped")
 }

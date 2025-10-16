@@ -120,6 +120,74 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/subscriptions/summary/{user_id}/{service_name}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Рассчитывает общую стоимость подписки для пользователя за определенный период",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID in UUID format",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Service name",
+                        "name": "service_name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "01-2025",
+                        "description": "Start date in MM-YYYY format",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "12-2025",
+                        "description": "End date in MM-YYYY format",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success response with total cost",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.Summary"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid format for UUID in ` + "`" + `user_id` + "`" + `, empty service_name or missing start_date",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No subscriptions found for given criteria",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/subscriptions/{id}": {
             "get": {
                 "consumes": [
@@ -219,13 +287,13 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Удаление подписки по ID",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
+                "summary": "Удаление подписки по ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -348,6 +416,31 @@ const docTemplate = `{
                 "start_date": {
                     "type": "string",
                     "example": "07-2025"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "60601fee-2bf1-4721-ae6f-7636e79a0cba"
+                }
+            }
+        },
+        "subscription.Summary": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string",
+                    "example": "12-2025"
+                },
+                "service_name": {
+                    "type": "string",
+                    "example": "Yandex Plus"
+                },
+                "start_date": {
+                    "type": "string",
+                    "example": "01-2025"
+                },
+                "total_cost": {
+                    "type": "integer",
+                    "example": 800
                 },
                 "user_id": {
                     "type": "string",

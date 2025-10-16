@@ -16,7 +16,7 @@ func (r *subRepository) GetById(ctx context.Context, id string) (*entity.Subscri
 	var startDateDB time.Time
 	var endDateDB sql.NullTime
 
-	err := r.pool.QueryRow(
+	err := r.db.QueryRow(
 		ctx,
 		`SELECT id, service_name, price, user_id, start_date, end_date
 		FROM subscriptions 

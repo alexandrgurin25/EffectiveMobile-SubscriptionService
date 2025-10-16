@@ -6,8 +6,6 @@ import (
 	"strings"
 	"subscriptions/internal/entity"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository interface {
@@ -20,11 +18,11 @@ type Repository interface {
 }
 
 type subRepository struct {
-	pool *pgxpool.Pool
+	db DB
 }
 
-func New(pool *pgxpool.Pool) Repository {
-	return &subRepository{pool: pool}
+func New(db DB) Repository {
+	return &subRepository{db: db}
 }
 
 func parseDateToDB(dateStr string) (string, error) {

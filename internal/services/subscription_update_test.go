@@ -27,7 +27,7 @@ func TestUpdateById_Success(t *testing.T) {
 	}
 
 	mockRepo := mocks.NewMockRepository(ctrl)
-	mockRepo.EXPECT().UpdateById(ctx, sub).Return(nil).Times(1)
+	mockRepo.EXPECT().Update(ctx, sub).Return(nil).Times(1)
 	mockRepo.EXPECT().GetById(ctx, sub.Id).Return(sub, nil).Times(1)
 
 	service := New(mockRepo)
@@ -52,7 +52,7 @@ func TestUpdateById_Fail_UpdateError(t *testing.T) {
 	}
 
 	mockRepo := mocks.NewMockRepository(ctrl)
-	mockRepo.EXPECT().UpdateById(ctx, sub).Return(fmt.Errorf("update error")).Times(1)
+	mockRepo.EXPECT().Update(ctx, sub).Return(fmt.Errorf("update error")).Times(1)
 
 	service := New(mockRepo)
 	updatedSub, err := service.UpdateById(ctx, sub)
@@ -77,7 +77,7 @@ func TestUpdateById_Fail_GetByIdError(t *testing.T) {
 	}
 
 	mockRepo := mocks.NewMockRepository(ctrl)
-	mockRepo.EXPECT().UpdateById(ctx, sub).Return(nil).Times(1)
+	mockRepo.EXPECT().Update(ctx, sub).Return(nil).Times(1)
 	mockRepo.EXPECT().GetById(ctx, sub.Id).Return(nil, fmt.Errorf("subscription not found")).Times(1)
 
 	service := New(mockRepo)

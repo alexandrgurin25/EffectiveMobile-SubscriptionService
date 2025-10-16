@@ -20,7 +20,6 @@ func TestSubRepository_GetList_QueryError(t *testing.T) {
 	offset := 0
 	limit := 10
 
-	// Настраиваем ожидание вызова Query с ошибкой
 	mockDB.EXPECT().
 		Query(
 			ctx,
@@ -29,10 +28,8 @@ func TestSubRepository_GetList_QueryError(t *testing.T) {
 		).
 		Return(nil, assert.AnError)
 
-	// Вызываем тестируемый метод
 	result, err := repo.GetList(ctx, offset, limit, "", "")
 
-	// Проверяем результат
 	assert.Error(t, err)
 	assert.Nil(t, result)
 }

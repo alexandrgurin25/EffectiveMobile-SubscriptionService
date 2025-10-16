@@ -7,7 +7,7 @@ import (
 
 func (s *subService) UpdateById(ctx context.Context, sub *entity.Subscription) (*entity.Subscription, error) {
 
-	err := s.repo.UpdateById(ctx, sub)
+	err := s.repo.Update(ctx, sub)
 
 	if err != nil {
 		return nil, err

@@ -35,18 +35,15 @@ func TestSubRepository_CalculateSummary_SuccessWithEndDate(t *testing.T) {
 		).
 		Return(mockRow)
 
-	// Настраиваем поведение Scan
 	mockRow.EXPECT().
 		Scan(gomock.Any()).
 		DoAndReturn(func(dest ...interface{}) error {
-			*(dest[0].(*int)) = 4500 // totalCost
+			*(dest[0].(*int)) = 4500 
 			return nil
 		})
 
-	// Вызываем тестируемый метод
 	totalCost, err := repo.CalculateSummary(ctx, userID, serviceName, startDate, endDate)
 
-	// Проверяем результат
 	require.NoError(t, err)
 	assert.Equal(t, 4500, totalCost)
 }
@@ -63,12 +60,10 @@ func TestSubRepository_CalculateSummary_SuccessWithoutEndDate(t *testing.T) {
 	userID := "user-123"
 	serviceName := "Yandex Plus"
 	startDate := "01-2025"
-	endDate := "" // Пустая endDate
+	endDate := "" 
 
-	// Ожидаемые преобразованные даты
 	expectedStartDateStr := "2025-01-01"
 
-	// Используем gomock.Any() для SQL
 	mockDB.EXPECT().
 		QueryRow(
 			ctx,
@@ -77,18 +72,15 @@ func TestSubRepository_CalculateSummary_SuccessWithoutEndDate(t *testing.T) {
 		).
 		Return(mockRow)
 
-	// Настраиваем поведение Scan
 	mockRow.EXPECT().
 		Scan(gomock.Any()).
 		DoAndReturn(func(dest ...interface{}) error {
-			*(dest[0].(*int)) = 3000 // totalCost
+			*(dest[0].(*int)) = 3000 
 			return nil
 		})
 
-	// Вызываем тестируемый метод
 	totalCost, err := repo.CalculateSummary(ctx, userID, serviceName, startDate, endDate)
 
-	// Проверяем результат
 	require.NoError(t, err)
 	assert.Equal(t, 3000, totalCost)
 }
@@ -145,10 +137,9 @@ func TestSubRepository_CalculateSummary_InvalidStartDate(t *testing.T) {
 	startDate := "invalid-date" // Невалидная дата
 	endDate := "12-2025"
 
-	// Вызываем тестируемый метод
 	totalCost, err := repo.CalculateSummary(ctx, userID, serviceName, startDate, endDate)
 
-	// Проверяем результат
+	
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid start date")
 	assert.Equal(t, 0, totalCost)
@@ -165,14 +156,12 @@ func TestSubRepository_CalculateSummary_InvalidEndDate(t *testing.T) {
 	userID := "user-123"
 	serviceName := "Yandex Plus"
 	startDate := "01-2025"
-	endDate := "invalid-date" // Невалидная дата
+	endDate := "invalid-date" 
 
-	// Вызываем тестируемый метод
 	totalCost, err := repo.CalculateSummary(ctx, userID, serviceName, startDate, endDate)
 
-	// Проверяем результат
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "invalid start date") // В коде опечатка, должно быть "invalid end date"
+	assert.Contains(t, err.Error(), "invalid start date")
 	assert.Equal(t, 0, totalCost)
 }
 

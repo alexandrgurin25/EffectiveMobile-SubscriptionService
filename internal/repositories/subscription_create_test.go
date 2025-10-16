@@ -34,11 +34,9 @@ func TestSubRepository_Create_Success(t *testing.T) {
 		EndDate:   "12-2025",
 	}
 
-	// parseDateToDB возвращает строки
 	expectedStartDateStr := "2025-01-01"
 	expectedEndDateStr := "2025-12-01"
 
-	// Настраиваем ожидание вызова QueryRow
 	mockDB.EXPECT().
 		QueryRow(
 			ctx,
@@ -47,15 +45,12 @@ func TestSubRepository_Create_Success(t *testing.T) {
 		).
 		Return(mockRow)
 
-	// Для Scan нам нужны time.Time объекты
 	expectedStartDate := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
 	expectedEndDate := time.Date(2025, 12, 1, 0, 0, 0, 0, time.UTC)
 
-	// Настраиваем поведение Scan
 	mockRow.EXPECT().
 		Scan(gomock.Any()).
 		DoAndReturn(func(dest ...interface{}) error {
-			// Простое присваивание без проверок
 			*(dest[0].(*string)) = "sub-123"            // id
 			*(dest[1].(*string)) = "Yandex Plus"        // service_name
 			*(dest[2].(*int)) = 1500                    // price
@@ -68,10 +63,8 @@ func TestSubRepository_Create_Success(t *testing.T) {
 			return nil
 		})
 
-	// Вызываем тестируемый метод
 	result, err := repo.Create(ctx, sub)
 
-	// Проверяем результат
 	require.NoError(t, err)
 	assert.Equal(t, "sub-123", result.Id)
 	assert.Equal(t, "Yandex Plus", result.Name)

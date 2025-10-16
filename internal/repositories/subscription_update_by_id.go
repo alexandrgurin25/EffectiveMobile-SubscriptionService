@@ -8,7 +8,7 @@ import (
 	"subscriptions/internal/entity"
 )
 
-func (r *subRepository) UpdateById(ctx context.Context, subIn *entity.Subscription) error {
+func (r *subRepository) Update(ctx context.Context, subIn *entity.Subscription) error {
 
 	startDateForDB, err := parseDateToDB(subIn.StartDate)
 	if err != nil {

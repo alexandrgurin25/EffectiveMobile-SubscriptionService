@@ -115,16 +115,16 @@ func (mr *MockRepositoryMockRecorder) GetList(ctx, offset, limit, userID, servic
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetList", reflect.TypeOf((*MockRepository)(nil).GetList), ctx, offset, limit, userID, serviceName)
 }
 
-// UpdateById mocks base method.
-func (m *MockRepository) UpdateById(ctx context.Context, sub *entity.Subscription) error {
+// Update mocks base method.
+func (m *MockRepository) Update(ctx context.Context, sub *entity.Subscription) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateById", ctx, sub)
+	ret := m.ctrl.Call(m, "Update", ctx, sub)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateById indicates an expected call of UpdateById.
-func (mr *MockRepositoryMockRecorder) UpdateById(ctx, sub any) *gomock.Call {
+// Update indicates an expected call of Update.
+func (mr *MockRepositoryMockRecorder) Update(ctx, sub any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateById", reflect.TypeOf((*MockRepository)(nil).UpdateById), ctx, sub)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockRepository)(nil).Update), ctx, sub)
 }

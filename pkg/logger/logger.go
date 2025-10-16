@@ -17,8 +17,6 @@ type Logger struct {
 
 type ctxKey struct{}
 
-// New создает новый логгер и добавляет его в контекст
-// Если в контексте уже есть логгер, возвращает существующий
 func New(ctx context.Context) (context.Context, error) {
 	if GetLoggerFromCtx(ctx) != nil {
 		return ctx, nil
@@ -33,8 +31,6 @@ func New(ctx context.Context) (context.Context, error) {
 	return ctx, nil
 }
 
-// FromContext возвращает логгер из контекста
-// Если логгер не найден, создает новый
 func GetLoggerFromCtx(ctx context.Context) *Logger {
 	if logger := loggerFromContext(ctx); logger != nil {
 		return logger
@@ -44,7 +40,6 @@ func GetLoggerFromCtx(ctx context.Context) *Logger {
 	return &Logger{zap: zapLogger}
 }
 
-// loggerFromContext возвращает логгер из контекста или nil если не найден
 func loggerFromContext(ctx context.Context) *Logger {
 	if ctx == nil {
 		return nil
@@ -56,7 +51,6 @@ func loggerFromContext(ctx context.Context) *Logger {
 	return nil
 }
 
-// addContextFields добавляет поля из контекста к логу
 func (l *Logger) addContextFields(ctx context.Context, fields []zap.Field) []zap.Field {
 	if ctx == nil {
 		return fields

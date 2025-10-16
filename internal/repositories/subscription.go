@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+//go:generate mockgen -source=subscription.go -destination=mocks/mock.go -package=mocks
 type Repository interface {
 	Create(ctx context.Context, sub *entity.Subscription) (*entity.Subscription, error)
 	GetById(ctx context.Context, id string) (*entity.Subscription, error)

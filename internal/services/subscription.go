@@ -6,6 +6,7 @@ import (
 	"subscriptions/internal/repositories"
 )
 
+
 type Service interface {
 	Create(ctx context.Context, sub *entity.Subscription) (*entity.Subscription, error)
 	GetById(ctx context.Context, id string) (*entity.Subscription, error)
